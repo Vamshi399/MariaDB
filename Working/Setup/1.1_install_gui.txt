@@ -1,0 +1,13 @@
+#Setup workbench on centos 7
+yum install -y epel-release
+wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+yum install mysql-community-release-el7-5.noarch.rpm -y
+yum install mysql-workbench -y
+
+
+or
+
+#setup Dbeaver on centos 7
+wget https://dbeaver.io/files/dbeaver-ce-latest-stable.x86_64.rpm
+rpm -Uvh ./dbeaver-ce-latest-stable.x86_64.rpm
+

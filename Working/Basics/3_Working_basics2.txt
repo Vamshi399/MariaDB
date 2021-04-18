@@ -1,0 +1,235 @@
+#create database
+CREATE DATABASE bookstore;
+ or
+create database if not exists bookstore;
+
+#switch to your database
+use bookstore;
+
+#create a file 'tablecr1.sql'
+#add contents
+CREATE TABLE books (
+isbn CHAR(20) PRIMARY KEY,
+title VARCHAR(50),
+author_id INT,
+publisher_id INT,
+year_pub CHAR(4),
+description TEXT );
+
+#run from command line to create table in your database
+[root@m1ce ~]# mysql -u root -p bookstore < tablecr1.sql
+
+#check for your table
+MariaDB [(none)]> use bookstore;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MariaDB [bookstore]> show tables;
++---------------------+
+| Tables_in_bookstore |
++---------------------+
+| books               |
++---------------------+
+1 row in set (0.00 sec)
+
+#drop table
+#create a file 'tabledr1.sql'
+#add content
+drop table books;
+
+#run from command line
+[root@m1ce ~]# mysql -u root -p bookstore < tabledr1.sql  
+
+#create another file 'tableshw.sql' to list tables
+#Add content
+show tables;
+
+#run from command line
+mysql -u root -p bookstore < tableshw.sql 
+
+#login into mariadb/mysql and now create table using file (but this time from within client)
+
+MariaDB [(none)]> use bookstore;
+Database changed
+
+MariaDB [bookstore]> source tablecr1.sql;
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [bookstore]> show tables;
++---------------------+
+| Tables_in_bookstore |
++---------------------+
+| books               |
++---------------------+
+1 row in set (0.00 sec)
+
+MariaDB [bookstore]> describe books;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| isbn         | char(20)    | NO   | PRI | NULL    |       |
+| title        | varchar(50) | YES  |     | NULL    |       |
+| author_id    | int(11)     | YES  |     | NULL    |       |
+| publisher_id | int(11)     | YES  |     | NULL    |       |
+| year_pub     | char(4)     | YES  |     | NULL    |       |
+| description  | text        | YES  |     | NULL    |       |
+
+column (isbn) is an identification number for each row—this name relates to the unique identifier used in the book 
+publishing business. 
+It has a fixed-width character type of 20 characters. It is primary key column on which data will be indexed. 
+column data type for the book title is a variable width character column of fifty characters at most. 
+third and fourth columns will be used for identification numbers for the author and the publisher. They are integer 
+data types. 
+The fifth column is used for the publication year of each book. 
+The last column is for entering a description of each book. It's a TEXT data type, i.e. it's a variable width 
+column and it can hold up to 65535 bytes 
+of data for each row. 
+
+#create one more table
+#create a file 'tablecr2.sql'
+#add content
+CREATE TABLE authors
+(author_id INT AUTO_INCREMENT PRIMARY KEY,
+name_last VARCHAR(50),
+name_first VARCHAR(50),
+country VARCHAR(50) );
+
+#run from command line or from within client
+MariaDB [bookstore]> source tablecr2.sql;
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [bookstore]> show tables;
++---------------------+
+| Tables_in_bookstore |
++---------------------+
+| authors             |
+| books               |
++---------------------+
+2 rows in set (0.00 sec)
+
+#create another file to insert data 'tableinsrt.sql'
+#Add content
+INSERT INTO authors
+(name_last, name_first, country)
+VALUES('Kafka', 'Franz', 'Czech Republic');
+INSERT INTO books
+(title, author_id, isbn, year_pub)
+VALUES('The Castle', '1', '0805211063', '1998');
+
+#run from command line
+mysql -u root -p bookstore < tableinsrt.sql 
+
+#login and check
+MariaDB [bookstore]> select * from authors;
++-----------+-----------+------------+----------------+
+| author_id | name_last | name_first | country        |
++-----------+-----------+------------+----------------+
+|         1 | Kafka     | Franz      | Czech Republic |
++-----------+-----------+------------+----------------+
+1 row in set (0.00 sec)
+
+MariaDB [bookstore]> select * from books;
++------------+------------+-----------+--------------+----------+-------------+
+| isbn       | title      | author_id | publisher_id | year_pub | description |
++------------+------------+-----------+--------------+----------+-------------+
+| 0805211063 | The Castle |         1 |         NULL | 1998     | NULL        |
++------------+------------+-----------+--------------+----------+-------------+
+
+#similarly create one more file 'tableinsrt2.sql'
+#add content
+INSERT INTO books
+(title, author_id, isbn, year_pub)
+VALUES('The Trial', '1', '0805210407', '1995'),
+('The Metamorphosis', '1', '0553213695', '1995'),
+('America', '1', '0805210644', '1995');
+
+#run from command line
+mysql -u root -p bookstore < tableinsrt2.sql
+
+#check for data
+MariaDB [bookstore]> select * from books;
++------------+-------------------+-----------+--------------+----------+-------------+
+| isbn       | title             | author_id | publisher_id | year_pub | description |
++------------+-------------------+-----------+--------------+----------+-------------+
+| 0553213695 | The Metamorphosis |         1 |         NULL | 1995     | NULL        |
+| 0805210407 | The Trial         |         1 |         NULL | 1995     | NULL        |
+| 0805210644 | America           |         1 |         NULL | 1995     | NULL        |
+| 0805211063 | The Castle        |         1 |         NULL | 1998     | NULL        |
++------------+-------------------+-----------+--------------+----------+-------------+
+
+#create a file to read data from table
+'tablesel1.sql'
+#add content
+----
+SELECT title FROM books;
+SELECT title FROM books LIMIT 5;
+#to list author's name for each book along with the title, use a join
+SELECT title, name_last FROM books JOIN authors USING (author_id);
+SELECT title AS 'Kafka Books' FROM books
+JOIN authors USING (author_id)
+WHERE name_last = 'Kafka';
+----
+
+#run from command line
+mysql -u root -p bookstore < tablesel1.sql 
+mysql -u root -p bookstore < tablesel1.sql > selout1.txt
+
+#or run from within client
+MariaDB [(none)]> use bookstore;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MariaDB [bookstore]> source tablesel1.sql
++-------------------+
+| title             |
++-------------------+
+| The Metamorphosis |
+| The Trial         |
+| America           |
+| The Castle        |
++-------------------+
+4 rows in set (0.00 sec)
+
++-------------------+
+| title             |
++-------------------+
+| The Metamorphosis |
+| The Trial         |
+| America           |
+| The Castle        |
++-------------------+
+4 rows in set (0.00 sec)
+
++-------------------+-----------+
+| title             | name_last |
++-------------------+-----------+
+| The Metamorphosis | Kafka     |
+| The Trial         | Kafka     |
+| America           | Kafka     |
+| The Castle        | Kafka     |
++-------------------+-----------+
+4 rows in set (0.00 sec)
+
++-------------------+
+| Kafka Books       |
++-------------------+
+| The Metamorphosis |
+| The Trial         |
+| America           |
+| The Castle        |
++-------------------+
+4 rows in set (0.00 sec)
+
+#create file to update/delete data
+'tableupd1.sql'
+
+#add content
+UPDATE books SET title = 'Amerika' WHERE isbn = '0805210644';
+DELETE FROM books WHERE author_id = '2034';
+
+#run from command line
+mysql -u root -p bookstore < tableupd1.sql
+
+#check ur tables

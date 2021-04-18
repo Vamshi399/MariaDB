@@ -1,0 +1,62 @@
+#check files
+ls /var/lib/mysql
+
+#To determine the default command option and system variable values used by the server, execute this command:
+$mysqld --verbose help
+#The command produces a list of all mysqld options and configurable system variables. 
+#Its output includes the default option and variable values
+
+#to see what variables mysql server is using
+$mysqldadmin variables -u root -p
+
+$mysqld --verbose --help
+Some of the items in the list are actually system variables that can be set at server startup. 
+These can be displayed at runtime using the SHOW VARIABLES statement. 
+Some items displayed by the preceding mysqld command do not appear in SHOW VARIABLES output; 
+this is because they are options only and not system variables.
+
+--Server command options
+#Flush (synchronize) all changes to disk after each SQL statement. Normally, MySQL does a write 
+#of all changes to disk only after each SQL statement and lets the operating system handle the synchronizing to disk. 
+$mysqld --verbose --help | grep flush
+
+#The path to the MySQL installation directory. This option sets the basedir system variable.
+#The server executable determines its own full path name at startup and uses the parent of the directory 
+#in which it is located as the default basedir value. This in turn enables the server to use that basedir 
+#when searching for server-related information such as the share directory containing error messages.
+$mysqld --verbose --help | grep basedir
+
+Other useful options
+--default-time-zone=timezone
+$mysqld --verbose --help | grep 'file'
+$mysqld --verbose --help | grep 'skip'
+
+#for more info on skip-grant refer 'skip_grant_option' file
+
+--------------------------------------
+>help show;
+
+>use mysql;
+>show tables;
+>show tables like '%log%';
+
+#to see what logs are switched on
+>show variables like '%log%';
+
+#if OFF
+>set slow_query_log=on;
+>show variables like '%general%';
+
+#if OFF
+#since it is a global variable
+>set global general_log = on;
+
+-------------------
+#finding tables with more rows
+>use information_schema;
+>select * from TABLES;
+>describe tables;
+>select * from tables order by table_rows desc limit 5;
+>select table_rows from tables order by table_rows desc limit 5;
+
+

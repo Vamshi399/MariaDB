@@ -1,0 +1,217 @@
+The general query log is a log of every SQL query received from a client, as well as each client connect and disconnect.
+Since it's a record of every query received by the server, it can grow large quite quickly.
+
+If you only want a record of queries that change data, it might be better to use the binary log instead.
+One important difference is that the binary log only logs a query when the transaction is committed by the server,
+but the general query log logs a query immediately when it is received by the server.
+
+show variables like '%log%';
+show variables like '%log_warnings%';
+
+#look for 
+| general_log                               | ON
+| general_log_file                          | m1ce.log 
+| slow_query_log                            | OFF                                                          |
+| slow_query_log_file                       | m1ce-slow.log
+| log_error         			    | /var/log/mysql/mysqld.error.log 
+#the above logs should be found in datadir i.e /var/log/mysql
+
+#to set from shell
+SET GLOBAL general_log=1;
+
+#to set permanently
+
+mkdir /var/log/mysql
+
+or edit server cnf file 
+vi /etc/my.cnf.d/server.cnf
+
+add these lines
+[mysqld]
+general_log=on
+general_log_file=/var/log/mysql/general_info.log
+
+#to shudown
+mysqladmin shutdown -u root -p
+
+#to start ur mysqld server with changes
+mysqld -u root
+
+#checking in table if logging stores info in general_log table
+
+mysql>use information_schema;
+mysql>select * from TABLES where table_name like '%log%';
+MariaDB [information_schema]> use mysql
+MariaDB [mysql]> select * from general_log;
+
+#we can either start mysqld with options: TABLE/FILE/TABLE,FILE
+mysqladmin shutdown -u root -p
+
+#option 1(logging into table only)
+mysqld -u root --log_output=TABLE
+
+[check if logging is happening in mysql.general_log table]
+
+		mysql -u root -p
+		>use mysql;
+		>select * from general_log;
+		>SET GLOBAL general_log=0;
+
+#option 2(logging into table and file)
+mysqld -u root --log_output=TABLE,FILE
+
+or we can set in
+[mysqld]
+log_output=TABLE
+general_log=on
+
+or set from command line
+SET GLOBAL log_output='TABLE';
+SET GLOBAL general_log=1;
+
+A user with the SUPER privilege can disable logging to the general query log for a connection by
+ setting the SQL_LOG_OFF system variable to 1
+SET SESSION SQL_LOG_OFF=1;
+
+To disable logging to the general query log for specific types of statements
+[mysqld]
+log_output=FILE
+general_log
+general_log_file=queries.log
+log_disabled_statements='slave,sp'
+------------------------------
+Slow_query_log:
+log_queries_not_using_indexes:Queries that don't use an index, or that perform a full index scan
+where the index doesn't limit the number of rows 
+log_slow_admin_statements:Log slow OPTIMIZE, ANALYZE, ALTER and other administrative statements to the slow log if it is open
+log_slow_disabled_statements:If set, the specified type of statements will not be logged to the slow query log.
+log_slow_filter:
+Comma-delimited string containing one or more settings for filtering what is logged to the slow query log.
+If a query matches one of the types listed in the filter, and takes longer than long_query_time, it will be logged. 
+Sets log-slow-admin-statements to ON. 
+
+    admin log administrative queries (create, optimize, drop etc...)
+    filesort logs queries that use a filesort.
+    filesort_on_disk logs queries that perform a a filesort on disk.
+    filesort_priority_queue (from MariaDB 10.3.2)
+    full_join logs queries that perform a join without indexes.
+    full_scan logs queries that perform full table scans.
+    query_cache log queries that are resolved by the query cache .
+    query_cache_miss logs queries that are not found in the query cache.
+    tmp_table logs queries that create an implicit temporary table.
+    tmp_table_on_disk logs queries that create a temporary table on disk. 
+
+log_slow_rate_limit:The slow query log will log every this many queries. The default is 1, or every query, 
+while setting it to 20 would log every 20 queries, or five percent. Aims to reduce I/O usage and excessively large slow query logs. 
+long_query_time:If a query takes longer than this many seconds to execute (microseconds can be specified too), the Slow_queries status variable is incremented and, if enabled, the query is logged to the slow query log. 
+max_error_count:specifies the maximum number of messages stored for display by SHOW ERRORS and SHOW WARNINGS statements. 
+
+#to enable slow query log
+edit /etc/my.cnf.d/server.cnf
+& add details for slow query log
+
+[mysqld]
+slow_query_log
+slow_query_log_file=/var/log/mysql/query-slow.log
+query_cache_size=11048576
+query_cache_type=1
+
+#to test if now queries are logged
+>set long_query_time = 0.10;
+>show status like 'Qcache%';
+#assuming you already have auction table in db-bankdata, let's create one more table
+
+>create table auction2 as select * from auction where item='Xbox game console';
+>select distinct(item) from auction;
+>select distinct(item) from auction2;
+>select a.serno,a.auctionid,a.bid,a.item,b.auction_type from auction a join auction2 b on a.item=b.item;
+or
+>select a.serno,a.auctionid,a.bid,a.item,b.auction_type from auction a inner join auction2 b on a.item=b.item;
+or
+#adding query result to cache and also selecting smaller tabler as first table in join
+>select sql_cache a.serno,a.auctionid,a.bid,a.item,b.auction_type from auction2 b inner join auction a on a.item=b.item;
+
+#running query to see if benefits from cache
+>select a.serno,a.auctionid,a.bid,a.item,b.auction_type from auction2 b inner join auction a on a.item=b.item;
+
+#running it without using cache
+>select sql_no_cache a.serno,a.auctionid,a.bid,a.item,b.auction_type from auction2 b inner join auction a on a.item=b.item;
+
+#to clear cache
+>flush tables;
+or
+>reset query cache
+
+#check ur slow query log
+#check Qcache hits/misses
+
+#additional commands to push data into slow query log
+$mysql -u root -p bankdata < xyz.sql > output.csv
+#provided ur sql file has a query which has reasons to land into slow-query log
+----------------------------
+#Error logs:
+The error log contains a record of critical errors that occurred during the server's operation,
+table corruption, start and stop information.
+MariaDB always writes its error log, but the destination is configurable.
+--if a specific file name is not configured, then the log will be written to 
+the ${hostname}.err file in the datadir directory by default.
+--if the log_error system variable is not set, then errors are written to stderr
+--f you start MariaDB with mysqld_safe, then the error log can be redirected to the syslog.
+--If you start MariaDB with systemd, then the error log can also be redirected to the syslog. 
+
+mkdir /var/log/mysql
+chown -R mysql:mysql /var/log/mysql
+
+edit /etc/my.cnf
+[mysqld]
+log_error=/var/log/mysql/mysqld.error.log
+#log_error=mariadb.err
+#slow_query_log_file=
+#log-bin= 
+
+start mysqld
+
+#Error Log Verbosity
+In MariaDB 10.2.4 and later, the default value of the log_warnings system variable is 2
+In MariaDB 10.2.3 and before, the default value of the log_warnings system variable is 1
+
+#can be set from client or from /etc/my.cnf file
+SET GLOBAL log_warnings=3;
+
+If log_warnings is 0, then many optional warnings will not be logged. However, this does not prevent all warnings from being logged, because there are certain core warnings that will always be written to the error log.
+
+If log_warnings is 1, then many types of warnings are logged. Some useful warnings are:
+Replication-related messages: 
+Messages related to DNS lookup failures:
+Messages related to the event scheduler: 
+Messages related to unsafe statements for statement-based replication: 
+
+Frequent warnings about unsafe statements for statement-based replication can cause the error log to grow very large. In MariaDB 10.0.14 and later, MariaDB will automatically detect frequent duplicate warnings about unsafe statements for statement-based replication. After 10 identical warnings are detected, MariaDB will prevent that same warning from being written to the error log again for the next 5 minutes.
+
+If log_warnings is 2, then a couple other different kinds of warnings are printed. For example:
+Messages related to access denied errors: 
+Messages related to connections that are aborted due to errors or timeouts: 
+Messages related to table handler errors: 
+Messages related to the files used to persist replication state: 
+Messages about a master's binary log dump thread: 
+
+If log_warnings is 3, then a couple other different kinds of warnings are printed
+Messages related to old-style language options: 
+Messages related to progress of InnoDB online DDL: 
+
+If log_warnings is 4, then a couple other different kinds of warnings are printed. 
+Messages related to killed connections: 
+Messages related to all closed connections: 
+Messages related to released connections, such as when a transaction is committed 
+
+If log_warnings is 9, then some very verbose warnings are printed. 
+Messages about initializing plugins: 
+
+#to flush logs
+mysqladmin flush-logs -u root -p
+mysqladmin refresh -u root -p
+
+#turn slow_query log option on to capture slow query logs
+#we can use mysqldumpslow
+--to examine the slow query log
+

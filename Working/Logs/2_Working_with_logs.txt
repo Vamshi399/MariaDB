@@ -1,0 +1,101 @@
+The binary log contains a record of all changes to the databases, both data and structure,
+ as well as how long each statement took to execute. It consists of a set of binary log files and an index.
+
+This means that statements such as CREATE, ALTER, INSERT, UPDATE and DELETE will be logged, 
+but statements that have no effect on the data, such as SELECT and SHOW, will not be logged. 
+
+#Binary logs
+
+#look for:
+show variables like '%bin%log%';
+show variables like '%log%bin%';
+
+|binlog_annotate_row_events                | ON       
+| binlog_cache_size                         | 32768  
+| binlog_checksum                           | CRC32  
+| binlog_commit_wait_count                  | 0      |
+| binlog_commit_wait_usec                   | 100000 |
+| binlog_direct_non_transactional_updates   | OFF    |
+| binlog_format                             | MIXED  |
+| binlog_optimize_thread_scheduling         | ON     |
+| binlog_row_image                          | FULL   |
+| binlog_stmt_cache_size                    | 32768  |
+| encrypt_binlog                            | OFF  
+| log_bin                                   | OFF   |
+| log_bin_basename                          |      |
+| log_bin_compress                          | OFF  |
+| log_bin_compress_min_len                  | 256  |
+| log_bin_index                             |      |
+| log_bin_trust_function_creators           | OFF
+
+
+
+To enable binary logging, start the server with the --log-bin[=name] 
+If you don't provide a name (which can, optionally, include an absolute path),
+ the default will be datadir/log-basename-bin, datadir/mysql-bin or datadir/mariadb-bin
+
+The directory storing the binary logs will contain a binary log index, as well as the individual binary log files.
+
+Clients with the SUPER privilege can disable and re-enable the binary log for the current session
+SET sql_log_bin = 0;
+SET sql_log_bin = 1;
+
+To delete all binary log files on the server, run the RESET MASTER command. 
+To delete all binary logs before a certain datetime, or up to a certain number, use PURGE BINARY LOGS.
+
+Log files can also be removed automatically with the expire_logs_days system variable. 
+This is set to 0 by default (no removal), but can be set to a time, in days, 
+after which a binary log file will be automatically removed. 
+
+Log files will only be checked for being older than expire_logs_days upon log rotation, so if your binary log only 
+fills up slowly and does not reach max_binlog_size on a daily basis, you may see older log files still being kept. 
+You can also force log rotation, and so expiry deletes, by running FLUSH BINARY LOGS on a regular basis. 
+Always set expire_logs_days higher than any possible slave lag.
+
+By default, all changes to data or data structure are logged. 
+This behavior can be changed by starting the server with the --binlog-ignore-db=database_name or --binlog-do-db=database_name
+
+--binlog-ignore-db=database_name behaves differently depending on whether statement-based or row-based logging is used. 
+For statement-based logging, the server will not log any statement where the default database is database_name. 
+The default database is set with the USE statement.
+
+Similarly, --binlog-do-db=database_name also behaves differently depending on whether statement-based or row-based logging is used.
+For statement-based logging, the server will only log statement where the default database is database_name. 
+The default database is set with the USE statement.
+
+For row-based logging, the server will log any updates to any tables in the named database/s, irrespective of the current database.
+
+SET GLOBAL binlog_format='ROW';
+
+or
+
+[mariadb]
+binlog_format=ROW
+
+When you change the binary log format on a server, it only changes the format for that server. Changing the binary log format on a master has no effect on the slave's binary log format. This can cause replication to give inconsistent results or to fail. 
+
+#list binary logs on server
+show binary logs
+show master logs
+
+#to see events in binary logs
+show binlog events [in 'log_name'] [from pos] [limit [offset,] row_count]
+
+----------------------
+#enable binary logs
+[mysqld]
+log_bin=1
+
+restart mysqld server
+
+#check in log path
+ls /var/lib/mysql/
+
+#from terminal
+$mysqlbinlog /var/lib/mysql/xxxx.log
+
+#create some data structures/changes and see if it gets logged in binary logs which captures changes
+
+
+
+

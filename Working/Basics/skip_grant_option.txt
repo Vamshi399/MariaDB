@@ -1,0 +1,27 @@
+--skip-grant-tables causes the server not to read the grant tables in the mysql system schema, and thus to start without using the privilege system at all. This gives anyone with access to the server unrestricted access to all databases.
+
+Because starting the server with --skip-grant-tables disables authentication checks, the server also disables remote connections in that case by enabling skip_networking.
+
+To cause a server started with --skip-grant-tables to load the grant tables at runtime, perform a privilege-flushing operation, which can be done in these ways:
+
+Issue a MySQL FLUSH PRIVILEGES statement after connecting to the server.
+
+Execute a mysqladmin flush-privileges or mysqladmin reload command from the command line.
+
+Privilege flushing might also occur implicitly as a result of other actions performed after startup, thus causing the server to start using the grant tables. For example, the server flushes the privileges if it performs an upgrade during the startup sequence.
+
+--skip-grant-tables disables failed-login tracking and temporary account locking because those capabilities depend on the grant tables. See Section 6.2.15, “Password Management”.
+
+--skip-grant-tables causes the server not to load certain other objects registered in the data dictionary or the mysql system schema:
+
+Scheduled events installed using CREATE EVENT and registered in the events data dictionary table.
+
+Plugins installed using INSTALL PLUGIN and registered in the mysql.plugin system table.
+
+To cause plugins to be loaded even when using --skip-grant-tables, use the --plugin-load or --plugin-load-add option.
+
+User-defined functions (UDFs) installed using CREATE FUNCTION and registered in the mysql.func system table.
+
+--skip-grant-tables does not suppress loading during startup of components.
+
+--skip-grant-tables causes the disabled_storage_engines system variable to have no effect.

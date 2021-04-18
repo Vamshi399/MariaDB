@@ -1,0 +1,9 @@
+dynamic columns
+create table prod(id int not null primary key auto_increment,
+name varchar(120) not null,
+attributes BLOB);
+
+insert into prod(name,attributes) values
+('john',columnn_create('colour','white','car','honda')),
+'johny',columnn_create('car','honda')),
+'johnie',columnn_create('colour','white','car','honda','bike','yamaha'))

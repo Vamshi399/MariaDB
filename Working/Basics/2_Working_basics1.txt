@@ -1,0 +1,133 @@
+#create database
+MariaDB [(none)]> CREATE DATABASE IF NOT EXISTS mydb;
+Query OK, 1 row affected (0.00 sec)
+
+#show databases
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mydb               |
+| mysql              |
+| performance_schema |
++--------------------+
+4 rows in set (0.00 sec)
+
+#switch to your database and create a table
+MariaDB [(none)]> use mydb;
+Database changed
+
+MariaDB [mydb]> create table if not exists customers ( custid int not null primary key auto_increment, custname varchar(100) not null, locationid int, productid varchar(50) );
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [mydb]> show tables;
++----------------+
+| Tables_in_mydb |
++----------------+
+| customers      |
++----------------+
+1 row in set (0.00 sec)
+
+MariaDB [mydb]> CREATE TABLE IF NOT EXISTS location (id int not null primary key auto_increment);
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [mydb]> CREATE TABLE IF NOT EXISTS products (id int not null primary key auto_increment);
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [mydb]> show tables;
++----------------+
+| Tables_in_mydb |
++----------------+
+| customers      |
+| location       |
+| products       |
++----------------+
+3 rows in set (0.00 sec)
+
+#check schema of table
+MariaDB [mydb]> describe customers;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| custid     | int(11)      | NO   | PRI | NULL    | auto_increment |
+| custname   | varchar(100) | NO   |     | NULL    |                |
+| locationid | int(11)      | YES  |     | NULL    |                |
+| productid  | varchar(50)  | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+#check ur other tables
+MariaDB [mydb]> describe location;
++-------+---------+------+-----+---------+----------------+
+| Field | Type    | Null | Key | Default | Extra          |
++-------+---------+------+-----+---------+----------------+
+| id    | int(11) | NO   | PRI | NULL    | auto_increment |
++-------+---------+------+-----+---------+----------------+
+1 row in set (0.01 sec)
+
+MariaDB [mydb]> describe products;
++-------+---------+------+-----+---------+----------------+
+| Field | Type    | Null | Key | Default | Extra          |
++-------+---------+------+-----+---------+----------------+
+| id    | int(11) | NO   | PRI | NULL    | auto_increment |
++-------+---------+------+-----+---------+----------------+
+1 row in set (0.00 sec)
+
+#insert some data into customers
+MariaDB [mydb]> insert into customers(custname,locationid,productid) values('John',1,1),('Marie',0,2),('Peter',3,1),('Jackie chan',4,3);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+#check for data
+MariaDB [mydb]> select * from customers;
++--------+-------------+------------+-----------+
+| custid | custname    | locationid | productid |
++--------+-------------+------------+-----------+
+|      1 | John        |          1 | 1         |
+|      2 | Marie       |          0 | 2         |
+|      3 | Peter       |          3 | 1         |
+|      4 | Jackie chan |          4 | 3         |
++--------+-------------+------------+-----------+
+
+
+#similarly other tables
+MariaDB [mydb]> insert into products(id) values(1);
+Query OK, 1 row affected (0.00 sec)
+
+MariaDB [mydb]> select * from products;
++----+
+| id |
++----+
+|  1 |
++----+
+1 row in set (0.00 sec)
+
+MariaDB [mydb]> insert into location(id) values(0);
+Query OK, 1 row affected (0.00 sec)
+
+MariaDB [mydb]> select * from location;
++----+
+| id |
++----+
+|  1 |
++----+
+1 row in set (0.00 sec)
+
+#update/modify some data
+MariaDB [mydb]> update customers set custname = 'Maria' where custid=2;
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [mydb]> select * from customers;
++--------+-------------+------------+-----------+
+| custid | custname    | locationid | productid |
++--------+-------------+------------+-----------+
+|      1 | John        |          1 | 1         |
+|      2 | Maria       |          0 | 2         |
+|      3 | Peter       |          3 | 1         |
+|      4 | Jackie chan |          4 | 3         |
++--------+-------------+------------+-----------+
+4 rows in set (0.00 sec)
+
+

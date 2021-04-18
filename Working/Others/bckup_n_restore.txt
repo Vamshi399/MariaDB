@@ -1,0 +1,15 @@
+>select columns into outfile '/tmp/auction.csv' fields terminated by ',' lines terminated by '\n' from auction;
+
+$mysqldump --help
+$mysqldump --databases bankdata > aucdata -u root -p
+$mysqldump bankdata > aucdata1 -u root -p
+$mysqldump --all-databases -u root -p
+$mysqldump --all-databases > alldump.sql -u root -p
+
+$mysql -u root -p 
+>create database rcvauc;
+>exit;
+
+#restore..
+$mysql -u root -p rcvauc < alldump.sql
+

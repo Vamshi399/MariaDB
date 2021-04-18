@@ -1,0 +1,27 @@
+#refer files 'tablecr3.sql' to create table and 'tableinsrtcsv.sql' to load data into it.
+#data comes from auction.csv file
+
+#refer files 'tablecr4.sql' to create table and 'tableinsrt2csv.sql; to load data into it.
+#data comes from Bank_full.csv file
+
+#run following queries to read data
+select * from bankdata limit 5;
+select * from bankdata limit 5,10;
+select * from bankdata where age > 75 limit 5;
+select * from bankdata order by age desc limit 10;
+select count(*) from bankdata where y = 'yes';
+select count(*) from bankdata where y = 'yes';
+select age,count(*) from bankdata group by age;
+select age,marital,count(*) from bankdata group by age;
+select age,marital,count(*) as count from bankdata group by age,marital order by count desc limit 10;
+select avg(balance) as avg,marital,count(*) as count from bankdata group by marital;
+
+
+select distinct(auctionid) from auction;
+select count(distinct(auctionid)) from auction;
+select auctionid,item,count(*) from auction group by auctionid,item;
+select item,count(*) from auction group by item;
+select item,count(*) from auction group by item,auctionid order by auctionid desc;
+select item,min(price),avg(price),max(price),count(*) from auction group by item,auctionid order by auctionid desc;
+select item,min(price),avg(price),max(price),count(*) from auction group by item,auctionid with rollup;
+

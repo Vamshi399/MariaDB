@@ -1,0 +1,25 @@
+Example for binary log
+Scenario 1:
+Assume the server has started with the option --binlog-ignore-db=employees. The following example is logged if statement-based logging is used, and is not logged with row-based logging.
+
+USE customers;
+UPDATE employees.details SET bonus=bonus*1.2;
+
+This is because statement-based logging examines the default database, in this case, customers. Since customers is not specified in the ignore list, the statement will be logged. If row-based logging is used, the example will not be logged as updates are written to the tables in the employees database.
+
+Assume instead the server started with the option --binlog-do-db=employees. The following example is not logged if statement-based logging is used, and is logged with row-based logging.
+
+USE customers;
+UPDATE employees.details SET bonus=bonus*1.2;
+
+This is again because statement-based logging examines the default database, in this case, customers. Since customers is not specified in the do list, the statement will not be logged. If row-based logging is used, the example will be logged as updates are written to the tables in the employees database.
+
+Scenario 2:
+Be careful changing the binary log format dynamically when the server is a slave and parallel replication is enabled. If you change the global value dynamically, then that does not also affect the session values of any currently running threads. This can cause problems with parallel replication, because the worker threads will remain running even after STOP SLAVE is executed. This can be worked around by resetting the slave_parallel_threads system variable. For example:
+
+STOP SLAVE;
+SET GLOBAL slave_parallel_threads=0;
+SET GLOBAL binlog_format='ROW';
+SET GLOBAL slave_parallel_threads=4;
+START SLAVE
+

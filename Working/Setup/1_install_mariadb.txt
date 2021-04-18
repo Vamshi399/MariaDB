@@ -1,0 +1,208 @@
+#Installing MariaDB on centos 7
+#visit mariadb.org>Downloads
+
+#Option 1 : Using tar file
+MariaDB Server version: MariaDB Server 10.2.36
+OS: Linux
+Architecture: x86_64
+Init System : Systemd
+
+#Download the tar file
+
+#Option 2 : Using MariaDB Repositories
+
+[db@m1ce ~]$ arch
+x86_64
+
+#Choose a MariaDB Server version: 10.2
+vi /etc/yum.repos.d/MariaDB.repo
+
+#Add these lines:
+# MariaDB 10.2 CentOS repository list - created 2020-11-18 20:01 UTC
+# https://mariadb.org/download/
+[mariadb]
+name = MariaDB
+baseurl = http://mirror.23media.de/mariadb/yum/10.2/centos7-amd64
+gpgkey=http://mirror.23media.de/mariadb/yum/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+#to save file <esc+shift>:wq
+sudo yum install MariaDB-server MariaDB-client
+
+#check
+[db@m1ce ~]$ ls /usr/bin/mar*
+/usr/bin/mariadb-service-convert
+[db@m1ce ~]$ ls /usr/bin/mysq*
+/usr/bin/mysql                       /usr/bin/mysqldump             /usr/bin/mysql_secure_installation
+/usr/bin/mysqlaccess                 /usr/bin/mysqldumpslow         /usr/bin/mysql_setpermission
+/usr/bin/mysqladmin                  /usr/bin/mysql_embedded        /usr/bin/mysqlshow
+/usr/bin/mysqlbinlog                 /usr/bin/mysql_find_rows       /usr/bin/mysqlslap
+/usr/bin/mysqlcheck                  /usr/bin/mysql_fix_extensions  /usr/bin/mysql_tzinfo_to_sql
+/usr/bin/mysql_convert_table_format  /usr/bin/mysqlhotcopy          /usr/bin/mysql_upgrade
+/usr/bin/mysqld_multi                /usr/bin/mysqlimport           /usr/bin/mysql_waitpid
+/usr/bin/mysqld_safe                 /usr/bin/mysql_install_db
+/usr/bin/mysqld_safe_helper          /usr/bin/mysql_plugin
+
+[db@m1ce ~]$ ls /etc/my.cnf
+/etc/my.cnf
+
+------------
+[db@m1ce ~]$ more /etc/my.cnf
+#
+# This group is read both by the client and the server
+# use it for options that affect everything
+#
+[client-server]
+
+#
+# include *.cnf from the config directory
+#
+!includedir /etc/my.cnf.d
+-------------
+[db@m1ce ~]$ mysql --version
+mysql  Ver 15.1 Distrib 10.2.36-MariaDB, for Linux (x86_64) using readline 5.1
+
+--------------
+Error:
+[db@m1ce ~]$ mysqld
+2020-11-18 21:17:06 140048758692032 [Note] mysqld (mysqld 10.2.36-MariaDB) starting as process 20444 ...
+2020-11-18 21:17:06 140048758692032 [Warning] Could not increase number of max_open_files to more than 1024 (request: 32184)
+2020-11-18 21:17:06 140048758692032 [Warning] Changed limits: max_open_files: 1024  max_connections: 151 (was 151)  table_cache: 421 (was 2000)
+2020-11-18 21:17:06 140048758692032 [Warning] Can't create test file /var/lib/mysql/m1ce.lower-test
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Uses event mutexes
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Compressed tables use zlib 1.2.7
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Using Linux native AIO
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Number of pools: 1
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Using SSE2 crc32 instructions
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Initializing buffer pool, total size = 128M, instances = 1, chunk size = 128M
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Completed initialization of buffer pool
+2020-11-18 21:17:06 140048192694016 [Note] InnoDB: If the mysqld execution user is authorized, page cleaner thread priority can be changed. See the man page of setpriority().
+2020-11-18 21:17:06 140048758692032 [ERROR] InnoDB: The innodb_system data file 'ibdata1' must be writable
+2020-11-18 21:17:06 140048758692032 [ERROR] InnoDB: The innodb_system data file 'ibdata1' must be writable
+2020-11-18 21:17:06 140048758692032 [ERROR] InnoDB: Plugin initialization aborted with error Generic error
+2020-11-18 21:17:06 140048758692032 [Note] InnoDB: Starting shutdown...
+2020-11-18 21:17:06 140048758692032 [ERROR] Plugin 'InnoDB' init function returned error.
+2020-11-18 21:17:06 140048758692032 [ERROR] Plugin 'InnoDB' registration as a STORAGE ENGINE failed.
+2020-11-18 21:17:06 140048758692032 [ERROR] mysqld: File '/var/lib/mysql/aria_log_control' not found (Errcode: 13 "Permission denied")
+2020-11-18 21:17:06 140048758692032 [ERROR] mysqld: Got error 'Can't open file' when trying to use aria control file '/var/lib/mysql/aria_log_control'
+2020-11-18 21:17:06 140048758692032 [ERROR] Plugin 'Aria' init function returned error.
+2020-11-18 21:17:06 140048758692032 [ERROR] Plugin 'Aria' registration as a STORAGE ENGINE failed.
+2020-11-18 21:17:06 140048758692032 [Note] Plugin 'FEEDBACK' is disabled.
+2020-11-18 21:17:06 140048758692032 [ERROR] Could not open mysql.plugin table. Some plugins may be not loaded
+2020-11-18 21:17:06 140048758692032 [ERROR] Unknown/unsupported storage engine: InnoDB
+2020-11-18 21:17:06 140048758692032 [ERROR] Aborting
+
+Warning: Memory not freed: 520
+[db@m1ce ~]$ sudo mysqld
+2020-11-18 21:17:42 139682295777472 [Note] mysqld (mysqld 10.2.36-MariaDB) starting as process 20465 ...
+mysqld: Please consult the Knowledge Base to find out how to run mysqld as root!
+2020-11-18 21:17:42 139682295777472 [ERROR] Aborting
+
+[db@m1ce ~]$ netstat -ln | grep mysqld
+
+-----------
+Success:
+[root@m1ce ~]# mysqld -u root
+2020-11-18 21:18:22 140022118176960 [Note] mysqld (mysqld 10.2.36-MariaDB) starting as process 20528 ...
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Uses event mutexes
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Compressed tables use zlib 1.2.7
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Using Linux native AIO
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Number of pools: 1
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Using SSE2 crc32 instructions
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Initializing buffer pool, total size = 128M, instances = 1, chunk size = 128M
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Completed initialization of buffer pool
+2020-11-18 21:18:22 140021559551744 [Note] InnoDB: page_cleaner coordinator priority: -20
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Highest supported file format is Barracuda.
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: 128 out of 128 rollback segments are active.
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Creating shared tablespace for temporary tables
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Setting file './ibtmp1' size to 12 MB. Physically writing the file full; Please wait ...
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: File './ibtmp1' size is now 12 MB.
+2020-11-18 21:18:22 140022118176960 [Note] InnoDB: Waiting for purge to start
+2020-11-18 21:18:23 140022118176960 [Note] InnoDB: 5.7.32 started; log sequence number 1615498
+2020-11-18 21:18:23 140021549041408 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
+2020-11-18 21:18:23 140021549041408 [Note] InnoDB: Buffer pool(s) load completed at 201118 21:18:23
+2020-11-18 21:18:23 140022118176960 [Note] Plugin 'FEEDBACK' is disabled.
+2020-11-18 21:18:23 140022118176960 [Note] Server socket created on IP: '::'.
+2020-11-18 21:18:23 140022118176960 [Note] Reading of all Master_info entries succeeded
+2020-11-18 21:18:23 140022118176960 [Note] Added new Master_info '' to hash table
+2020-11-18 21:18:23 140022118176960 [Note] mysqld: ready for connections.
+Version: '10.2.36-MariaDB'  socket: '/var/lib/mysql/mysql.sock'  port: 3306  MariaDB Server
+-----------------
+Use clien program to connect:
+[db@m1ce ~]$ mysql
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 8
+Server version: 10.2.36-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> 
+
+#look for databases
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| test               |
++--------------------+
+2 rows in set (0.00 sec)
+
+#set a password for root
+[db@m1ce ~]$ /usr/bin/mysql_secure_installation
+
+Set root password? [Y/n] : Y
+Remove anonymous users? [Y/n] :Y
+Disallow root login remotely? [Y/n]: Y
+Remove test database and access to it? [Y/n] : Y
+Reload privilege tables now? [Y/n] : Y
+<enter>
+
+#login as root with password 
+mysql -u root -p
+<enter ur password>
+
+#now show databases (will show 'mysql' database too)
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
++--------------------+
+3 rows in set (0.00 sec)
+
+#check if mysqld is running
+[db@m1ce ~]$ sudo netstat -plten | grep mysqld
+[sudo] password for db: 
+tcp6       0      0 :::3306                 :::*                    LISTEN      0          65697      20528/mysqld   
+
+#starting mysqld in backgroun
+[root@m1ce ~]# nohup mysqld -u root &
+[1] 21051
+[root@m1ce ~]# nohup: ignoring input and appending output to ‘nohup.out’
+
+[root@m1ce ~]# sudo netstat -plten | grep mysqld
+tcp6       0      0 :::3306                 :::*                    LISTEN      0          70191      21051/mysqld   
+
+-------------------
+MariaDB [(none)]> use mysql;
+
+#to check accesses
+>select host,user from user;
+
+>grant all privileges on *.* to 'user'@'hostname' identified by 'pswd';
+
+
+
+
+
+
+
+
+

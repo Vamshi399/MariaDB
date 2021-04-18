@@ -1,0 +1,40 @@
+MariaDB supports different storage engines:
+To see which ones are available and supported by your server
+which are available, not available, 
+or which is currently set to the default. 
+The “Support:” column will display ‘YES’, ‘NO’, or ‘DEFAULT’
+
+>show engines;
+>use information_schema;
+>select table_name,engine from tables;
+>select * from engines;
+
+mysql> CREATE TABLE Shared_Data (
+    -> Data_ID INTEGER NOT NULL, 
+    -> Name VARCHAR(50) NOT NULL, 
+    -> Description VARCHAR(150)
+    -> ) ENGINE='CSV’;
+
+mysql> INSERT INTO Shared_Data VALUES
+    -> (1,’device one’, ‘the latest version of the best tech’),
+    -> (2,’device two’, ‘the fastest one on the market’);
+
+Upon success, if you inspect the database directory, there should now be a 
+‘Shared_Data.CSV’ file in it that contains the records you have inserted into the Shared_Data table.
+
+#changing storage engine
+>ALTER TABLE xyz ENGINE = innodb;
+
+>show plugins;
+>select * from plugins;
+
+#shows how much memory is used by the tables and internal buffers.
+#performance_schema is not a regular storage engine for storing data, 
+it's a mechanism for implementing the Performance Schema feature.
+>show engine performance_schema status;
+
+----------
+	
+	
+	
+
